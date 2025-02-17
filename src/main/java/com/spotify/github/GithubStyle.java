@@ -23,5 +23,5 @@ package com.spotify.github;
 import org.immutables.value.Value;
 
 /** The Immutables Value Style annotations. */
-@Value.Style(jdkOnly = true, forceJacksonPropertyNames = false)
+@Value.Style(jdkOnly = true, forceJacksonPropertyNames = false, delegateToString = "com.spotify.github.jackson.PrettyPrinter.toString")
 public @interface GithubStyle {}

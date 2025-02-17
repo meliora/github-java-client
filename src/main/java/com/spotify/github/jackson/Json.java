@@ -56,6 +56,15 @@ public class Json {
   }
 
   /**
+   * Create a pre-configured ObjectMapper object that pretty-prints it's output.
+   *
+   * @return ObjectMapper object
+   */
+  public static Json createPrettyPrinter() {
+    return withMapper(DefaultMapper.PRETTY_PRINT_INSTANCE);
+  }
+
+  /**
    * Create an instance with a provided mapper.
    *
    * @param mapper objectmapper
@@ -249,5 +258,21 @@ public class Json {
             .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+
+    private static final ObjectMapper PRETTY_PRINT_INSTANCE =
+        new ObjectMapper()
+            .registerModule(new ParameterNamesModule())
+            .registerModule(new Jdk8Module())
+            .registerModule(new JavaTimeModule())
+            .registerModule(new GithubApiModule())
+            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID)
+            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .enable(SerializationFeature.INDENT_OUTPUT);
   }
+
 }
