@@ -20,9 +20,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/spotify/github-java-client.git</connection>
-        <developerConnection>scm:git:git@github.com:spotify/github-java-client.git</developerConnection>
-        <url>scm:https://github.com/spotify/github-java-client/</url>
+        <connection>scm:git:https://github.com/meliora/github-java-client.git</connection>
+        <developerConnection>scm:git:git@github.com:meliora/github-java-client.git</developerConnection>
+        <url>scm:https://github.com/meliora/github-java-client/</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -97,13 +97,13 @@
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <mockito-core.version>5.6.0</mockito-core.version>
         <commons-io.version>2.6</commons-io.version>
-        <jackson.version>2.15.3</jackson.version>
+        <jackson.version>2.18.0</jackson.version>
         <immutables.version>2.9.3</immutables.version>
         <objenesis.version>3.3</objenesis.version>
         <opencensus.version>0.31.1</opencensus.version>
-        <okhttp.version>4.11.0</okhttp.version>
+        <okhttp.version>4.12.0</okhttp.version>
 
-        <shade.id>${project.groupId}.githubclient.shade</shade.id>
+<!--        <shade.id>${project.groupId}.githubclient.shade</shade.id>-->
     </properties>
 
     <dependencyManagement>
@@ -451,38 +451,38 @@
                     </sourceDirectories>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>${project.groupId}:${project.artifactId}</include>
-                                    <include>com.squareup.okhttp3</include>
-                                    <include>com.squareup.okio</include>
-                                </includes>
-                            </artifactSet>
-                            <relocations>
-                                <relocation>
-                                    <pattern>okhttp3</pattern>
-                                    <shadedPattern>${shade.id}.okhttp3</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>okio</pattern>
-                                    <shadedPattern>${shade.id}.okio</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-shade-plugin</artifactId>-->
+<!--                <version>3.2.3</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>shade</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <artifactSet>-->
+<!--                                <includes>-->
+<!--                                    <include>${project.groupId}:${project.artifactId}</include>-->
+<!--                                    <include>com.squareup.okhttp3</include>-->
+<!--                                    <include>com.squareup.okio</include>-->
+<!--                                </includes>-->
+<!--                            </artifactSet>-->
+<!--                            <relocations>-->
+<!--                                <relocation>-->
+<!--                                    <pattern>okhttp3</pattern>-->
+<!--                                    <shadedPattern>${shade.id}.okhttp3</shadedPattern>-->
+<!--                                </relocation>-->
+<!--                                <relocation>-->
+<!--                                    <pattern>okio</pattern>-->
+<!--                                    <shadedPattern>${shade.id}.okio</shadedPattern>-->
+<!--                                </relocation>-->
+<!--                            </relocations>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
