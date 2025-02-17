@@ -38,7 +38,7 @@ public interface Webhook extends UpdateTracking {
 
   /** ID */
   @Nullable
-  Integer id();
+  Long id();
 
   /** URL */
   @Nullable

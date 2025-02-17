@@ -39,5 +39,5 @@ public interface EventInstallation {
    *
    * @return the ID
    */
-  Integer id();
+  Long id();
 }

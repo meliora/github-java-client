@@ -51,7 +51,7 @@ public interface Milestone extends CloseTracking {
 
   /** ID */
   @Nullable
-  Integer id();
+  Long id();
 
   /** Number */
   @Nullable

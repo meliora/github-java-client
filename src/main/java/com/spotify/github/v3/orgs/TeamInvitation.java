@@ -35,7 +35,7 @@ import org.immutables.value.Value;
 public interface TeamInvitation {
   /** ID */
   @Nullable
-  Integer id();
+  Long id();
 
   /** login username */
   @Nullable

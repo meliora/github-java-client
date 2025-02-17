@@ -41,7 +41,7 @@ public interface User {
 
   /** ID. */
   @Nullable
-  Integer id();
+  Long id();
 
   /** Avatar URL. */
   @Nullable

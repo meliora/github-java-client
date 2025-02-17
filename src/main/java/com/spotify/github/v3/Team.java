@@ -38,7 +38,7 @@ public interface Team {
 
   /** ID. */
   @Nullable
-  Integer id();
+  Long id();
 
   /** Name. */
   @Nullable

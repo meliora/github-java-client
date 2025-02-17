@@ -38,7 +38,7 @@ import org.immutables.value.Value;
 public interface RepositoryInvitation {
 
   /** Unique identifier of the repository invitation */
-  Integer id();
+  Long id();
 
   /** Node ID */
   String nodeId();

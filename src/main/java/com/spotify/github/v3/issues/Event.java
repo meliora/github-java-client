@@ -41,9 +41,9 @@ import org.immutables.value.Value;
 @JsonDeserialize(as = ImmutableEvent.class)
 public interface Event {
 
-  /** The Integer ID of the event. */
+  /** The ID of the event. */
   @Nullable
-  Integer id();
+  Long id();
 
   /** The API URL for fetching the event. */
   @Nullable

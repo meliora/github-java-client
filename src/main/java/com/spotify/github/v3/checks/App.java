@@ -39,7 +39,7 @@ public interface App {
    *
    * @return the ID
    */
-  Integer id();
+  Long id();
 
   /**
    * The URL-friendly name of the GitHub App.

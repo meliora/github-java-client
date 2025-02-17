@@ -40,7 +40,7 @@ public interface RepositoryBase extends UpdateTracking {
 
   /** ID */
   @Nullable
-  Integer id();
+  Long id();
 
   /** Name */
   @Nullable
