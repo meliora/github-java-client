@@ -29,6 +29,8 @@ import com.spotify.github.v3.comment.Comment;
 import java.lang.invoke.MethodHandles;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
+
+import com.spotify.github.v3.issues.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,9 @@ public class IssueClient {
   static final String COMMENTS_URI_NUMBER_TEMPLATE = "/repos/%s/%s/issues/%s/comments";
   static final String COMMENTS_URI_TEMPLATE = "/repos/%s/%s/issues/comments";
   static final String COMMENTS_URI_ID_TEMPLATE = "/repos/%s/%s/issues/comments/%s";
+
+  static final String ISSUES_URI_ID_TEMPLATE = "/repos/%s/%s/issues/%s";
+
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final GitHubClient github;
@@ -125,4 +130,17 @@ public class IssueClient {
   private Iterator<AsyncPage<Comment>> listComments(final String path) {
     return new GithubPageIterator<>(new GithubPage<>(github, path, LIST_COMMENT_TYPE_REFERENCE));
   }
+
+  /**
+   * Get a specific issue.
+   *
+   * @param id issue id
+   * @return an issue
+   */
+  public CompletableFuture<Issue> getIssue(final int id) {
+    final String path = String.format(ISSUES_URI_ID_TEMPLATE, owner, repo, id);
+    log.info("Fetching issue from " + path);
+    return github.request(path, Issue.class);
+  }
+
 }
