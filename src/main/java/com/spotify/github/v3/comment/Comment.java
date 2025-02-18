@@ -20,6 +20,7 @@
 
 package com.spotify.github.v3.comment;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.spotify.github.GithubStyle;
@@ -46,7 +47,7 @@ public interface Comment extends UpdateTracking {
   URI htmlUrl();
 
   /** Comment ID. */
-  int id();
+  Long id();
 
   /** The {@link User} that made the comment. */
   @Nullable
@@ -70,8 +71,13 @@ public interface Comment extends UpdateTracking {
   Optional<String> commitId();
 
   /** The contents of the comment. */
-  @Nullable
-  String body();
+  Optional<String> body();
+
+  @JsonProperty("body_text")
+  Optional<String> bodyText();
+
+  @JsonProperty("body_html")
+  Optional<String> bodyHtml();
 
   /** The issueURL which the comment belongs to. */
   Optional<URI> issueUrl();

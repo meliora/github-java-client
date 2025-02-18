@@ -37,7 +37,7 @@ public class TeamTest {
   private String fixture;
 
   public static final void assertTeam(final Team team) {
-    assertThat(team.id(), is(1));
+    assertThat(team.id(), is(1L));
     assertThat(team.name(), is("Justice League"));
     assertThat(team.slug(), is("justice-league"));
     assertThat(team.description(), is("A great team."));

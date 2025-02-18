@@ -44,7 +44,7 @@ public class RepositoryTest {
   @Test
   public void testDeserialization() throws IOException {
     final Repository repository = Json.create().fromJson(fixture, Repository.class);
-    assertThat(repository.id(), is(1296269));
+    assertThat(repository.id(), is(1296269L));
     assertUser(repository.owner());
     assertThat(repository.name(), is("Hello-World"));
     assertThat(repository.fullName(), is(repository.owner().login() + "/Hello-World"));

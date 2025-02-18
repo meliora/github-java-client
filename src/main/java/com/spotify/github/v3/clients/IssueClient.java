@@ -27,12 +27,15 @@ import com.google.common.collect.ImmutableMap;
 import com.spotify.github.async.AsyncPage;
 import com.spotify.github.v3.comment.Comment;
 import java.lang.invoke.MethodHandles;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
 import com.spotify.github.v3.issues.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.HttpHeaders;
 
 /** Issue API client */
 public class IssueClient {
@@ -87,7 +90,7 @@ public class IssueClient {
   public CompletableFuture<Comment> getComment(final int id) {
     final String path = String.format(COMMENTS_URI_ID_TEMPLATE, owner, repo, id);
     log.info("Fetching issue comments from " + path);
-    return github.request(path, Comment.class);
+    return github.request(path, Comment.class, Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json"));
   }
 
   /**
@@ -128,7 +131,9 @@ public class IssueClient {
   }
 
   private Iterator<AsyncPage<Comment>> listComments(final String path) {
-    return new GithubPageIterator<>(new GithubPage<>(github, path, LIST_COMMENT_TYPE_REFERENCE));
+    return new GithubPageIterator<>(new GithubPage<>(
+            github, path, LIST_COMMENT_TYPE_REFERENCE, Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json"))
+    );
   }
 
   /**
@@ -140,7 +145,10 @@ public class IssueClient {
   public CompletableFuture<Issue> getIssue(final int id) {
     final String path = String.format(ISSUES_URI_ID_TEMPLATE, owner, repo, id);
     log.info("Fetching issue from " + path);
-    return github.request(path, Issue.class);
+    /*
+        application/vnd.github.full+json: Returns raw, text, and HTML representations. Response will include body, body_text, and body_html.
+     */
+    return github.request(path, Issue.class, Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json"));
   }
 
 }

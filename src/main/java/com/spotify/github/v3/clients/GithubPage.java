@@ -38,6 +38,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
@@ -50,6 +52,7 @@ public class GithubPage<T> implements AsyncPage<T> {
   private final GitHubClient github;
   private final String path;
   private final TypeReference<List<T>> typeReference;
+  private Map<String, String> extraHeaders;
 
   /**
    * C'tor.
@@ -58,14 +61,26 @@ public class GithubPage<T> implements AsyncPage<T> {
    * @param path resource page path
    * @param typeReference type reference for deserialization
    */
-  GithubPage(
-      final GitHubClient github, final String path, final TypeReference<List<T>> typeReference) {
+  GithubPage(final GitHubClient github, final String path, final TypeReference<List<T>> typeReference) {
     this.github = github;
     this.path = path;
     this.typeReference = typeReference;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * C'tor.
+   *
+   * @param github github client
+   * @param path resource page path
+   * @param typeReference type reference for deserialization
+   * @param extraHeaders extra headers to use in requests
+   */
+  GithubPage(final GitHubClient github, final String path, final TypeReference<List<T>> typeReference, final Map<String, String> extraHeaders) {
+      this(github, path, typeReference);
+      this.extraHeaders = extraHeaders;
+  }
+
+    /** {@inheritDoc} */
   @Override
   public CompletableFuture<Pagination> pagination() {
     return linkMapAsync()
@@ -124,7 +139,7 @@ public class GithubPage<T> implements AsyncPage<T> {
                   Optional.ofNullable(linkMap.get("next"))
                       .map(nextLink -> nextLink.url().toString().replaceAll(github.urlFor(""), ""))
                       .orElseThrow(() -> new NoSuchElementException("Page iteration exhausted"));
-              return new GithubPage<>(github, nextPath, typeReference);
+              return new GithubPage<>(github, nextPath, typeReference, extraHeaders);
             });
   }
 
@@ -137,15 +152,15 @@ public class GithubPage<T> implements AsyncPage<T> {
   /** {@inheritDoc} */
   @Override
   public AsyncPage<T> clone() {
-    return new GithubPage<>(github, path, typeReference);
+    return new GithubPage<>(github, path, typeReference, extraHeaders);
   }
 
   /** {@inheritDoc} */
   @Override
   public Iterator<T> iterator() {
-    return github
-        .request(path)
-        .thenApply(
+    CompletableFuture<Response> future = extraHeaders != null ? github.request(path, extraHeaders) : github.request(path);
+    return future
+         .thenApply(
             response ->
                 github
                     .json()
@@ -155,8 +170,8 @@ public class GithubPage<T> implements AsyncPage<T> {
   }
 
   private CompletableFuture<Map<String, Link>> linkMapAsync() {
-    return github
-        .request(path)
+    CompletableFuture<Response> future = extraHeaders != null ? github.request(path, extraHeaders) : github.request(path);
+    return future
         .thenApply(
             response -> {
                 Optional.ofNullable(response.body()).ifPresent(ResponseBody::close);

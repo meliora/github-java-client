@@ -80,7 +80,7 @@ public class TeamClientTest {
         completedFuture(json.fromJson(getFixture("team_get.json"), Team.class));
     when(github.request("/orgs/github/teams/justice-league", Team.class)).thenReturn(fixture);
     final Team team = teamClient.getTeam("justice-league").get();
-    assertThat(team.id(), is(1));
+    assertThat(team.id(), is(1L));
     assertThat(team.name(), is("Justice League"));
   }
 
@@ -157,7 +157,7 @@ public class TeamClientTest {
     when(github.request("/orgs/github/teams/1/members", LIST_TEAM_MEMBERS)).thenReturn(fixture);
     final List<User> teamMembers = teamClient.listTeamMembers("1").get();
     assertThat(teamMembers.get(0).login(), is("octocat"));
-    assertThat(teamMembers.get(1).id(), is(2));
+    assertThat(teamMembers.get(1).id(), is(2L));
     assertThat(teamMembers.size(), is(2));
   }
 
@@ -186,7 +186,7 @@ public class TeamClientTest {
 
     assertThat(users.size(), is(2));
     assertThat(users.get(0).login(), is("octocat"));
-    assertThat(users.get(1).id(), is(2));
+    assertThat(users.get(1).id(), is(2L));
   }
 
   @Test
@@ -225,7 +225,7 @@ public class TeamClientTest {
     final List<TeamInvitation> pendingInvitations =
         teamClient.listPendingTeamInvitations("1").get();
     assertThat(pendingInvitations.get(0).login(), is("octocat"));
-    assertThat(pendingInvitations.get(1).id(), is(2));
+    assertThat(pendingInvitations.get(1).id(), is(2L));
     assertThat(pendingInvitations.size(), is(2));
   }
 }

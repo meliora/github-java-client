@@ -100,4 +100,10 @@ public interface User {
 
   /** Is user a site admin. */
   Optional<Boolean> siteAdmin();
+
+  @Nullable
+  String email();
+
+  @Nullable
+  String name();
 }

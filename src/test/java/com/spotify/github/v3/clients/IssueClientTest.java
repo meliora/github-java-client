@@ -42,10 +42,13 @@ import com.spotify.github.async.AsyncPage;
 import com.spotify.github.jackson.Json;
 import com.spotify.github.v3.comment.Comment;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import okhttp3.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import javax.ws.rs.core.HttpHeaders;
 
 public class IssueClientTest {
 
@@ -74,18 +77,18 @@ public class IssueClientTest {
         Resources.toString(getResource(this.getClass(), "comments_page2.json"), defaultCharset());
     final Response lastPageResponse = createMockResponse(lastPageLink, lastPageBody);
 
-    when(github.request(format(COMMENTS_URI_NUMBER_TEMPLATE, "someowner", "somerepo", "123")))
+    when(github.request(format(COMMENTS_URI_NUMBER_TEMPLATE, "someowner", "somerepo", "123"), Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json")))
         .thenReturn(completedFuture(firstPageResponse));
     when(github.request(
-            format(COMMENTS_URI_NUMBER_TEMPLATE + "?page=2", "someowner", "somerepo", "123")))
+            format(COMMENTS_URI_NUMBER_TEMPLATE + "?page=2", "someowner", "somerepo", "123"), Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json")))
         .thenReturn(completedFuture(lastPageResponse));
 
     final Iterable<AsyncPage<Comment>> pageIterator = () -> issueClient.listComments(123);
     final List<Comment> listComments = Async.streamFromPaginatingIterable(pageIterator).collect(toList());
 
     assertThat(listComments.size(), is(30));
-    assertThat(listComments.get(0).id(), is(1345268));
-    assertThat(listComments.get(listComments.size() - 1).id(), is(1356168));
+    assertThat(listComments.get(0).id(), is(1345268L));
+    assertThat(listComments.get(listComments.size() - 1).id(), is(1356168L));
   }
 
   @Test
@@ -102,10 +105,10 @@ public class IssueClientTest {
         Resources.toString(getResource(this.getClass(), "comments_page2.json"), defaultCharset());
     final Response lastPageResponse = createMockResponse(lastPageLink, lastPageBody);
 
-    when(github.request(format(COMMENTS_URI_NUMBER_TEMPLATE, "someowner", "somerepo", "123")))
+    when(github.request(format(COMMENTS_URI_NUMBER_TEMPLATE, "someowner", "somerepo", "123"), Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json")))
         .thenReturn(completedFuture(firstPageResponse));
     when(github.request(
-            format(COMMENTS_URI_NUMBER_TEMPLATE + "?page=2", "someowner", "somerepo", "123")))
+            format(COMMENTS_URI_NUMBER_TEMPLATE + "?page=2", "someowner", "somerepo", "123"), Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json")))
         .thenReturn(completedFuture(lastPageResponse));
 
     final List<Comment> listComments = Lists.newArrayList();
@@ -117,8 +120,8 @@ public class IssueClientTest {
             });
 
     assertThat(listComments.size(), is(30));
-    assertThat(listComments.get(0).id(), is(1345268));
-    assertThat(listComments.get(listComments.size() - 1).id(), is(1356168));
+    assertThat(listComments.get(0).id(), is(1345268L));
+    assertThat(listComments.get(listComments.size() - 1).id(), is(1356168L));
   }
 
   @Test
@@ -130,6 +133,6 @@ public class IssueClientTest {
     when(github.post(eq(path), anyString())).thenReturn(completedFuture(response));
     final Comment comment = issueClient.createComment(10, "Me too").join();
 
-    assertThat(comment.id(), is(114));
+    assertThat(comment.id(), is(114L));
   }
 }

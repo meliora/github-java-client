@@ -39,7 +39,7 @@ public class UserTest {
 
   public static final void assertUser(final User user) {
     assertThat(user.login(), is("octocat"));
-    assertThat(user.id(), is(1));
+    assertThat(user.id(), is(1L));
     assertThat(
         user.avatarUrl(), is(URI.create("https://github.com/images/error/octocat_happy.gif")));
     assertThat(user.gravatarId(), is(Optional.of("")));

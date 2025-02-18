@@ -115,8 +115,8 @@ public class GithubAppClientTest {
 
     assertThat(response.totalCount(), is(2));
     assertThat(response.repositories().size(), is(2));
-    assertThat(response.repositories().get(0).id(), is(1));
-    assertThat(response.repositories().get(1).id(), is(2));
+    assertThat(response.repositories().get(0).id(), is(1L));
+    assertThat(response.repositories().get(1).id(), is(2L));
 
     RecordedRequest accessTokenRequest = mockServer.takeRequest(1, TimeUnit.MILLISECONDS);
     assertThat(accessTokenRequest.getMethod(), is("POST"));

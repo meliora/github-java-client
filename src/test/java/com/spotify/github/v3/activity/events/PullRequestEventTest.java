@@ -41,6 +41,6 @@ public class PullRequestEventTest {
     final PullRequestEvent prEvent = Json.create().fromJson(fixture, PullRequestEvent.class);
     assertThat(prEvent.action(), is(PullRequestActionState.OPENED));
     assertThat(prEvent.number(), is(1));
-    assertThat(prEvent.eventInstallation().id(), is(1));
+    assertThat(prEvent.eventInstallation().id(), is(1L));
   }
 }

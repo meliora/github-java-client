@@ -20,10 +20,15 @@
 
 package com.spotify.github;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.Optional;
+
+import com.spotify.github.v3.User;
 import org.immutables.value.Value;
+
+import javax.annotation.Nullable;
 
 /**
  * Convenience interface for tracking closing time and whatever is tracked in {@link
@@ -40,5 +45,11 @@ public interface CloseTracking extends UpdateTracking {
    *
    * @return The date when the issue was closed
    */
+  @Nullable
   Optional<GitHubInstant> closedAt();
+
+  @Nullable
+  @JsonProperty("closed_by")
+  User closedBy();
+
 }

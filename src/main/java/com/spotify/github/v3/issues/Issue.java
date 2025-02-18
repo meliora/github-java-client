@@ -20,6 +20,7 @@
 
 package com.spotify.github.v3.issues;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.spotify.github.CloseTracking;
@@ -73,12 +74,23 @@ public interface Issue extends CloseTracking {
   @Nullable
   String state();
 
+  /** The reason for the state change. Ignored unless state is changed. Can be one of: completed, not_planned, reopened, null */
+  @Nullable
+  @JsonProperty("state_reason")
+  String stateReason();
+
   /** The title of the issue. */
   @Nullable
   String title();
 
   /** The contents of the issue. */
   Optional<String> body();
+
+  @JsonProperty("body_text")
+  Optional<String> bodyText();
+
+  @JsonProperty("body_html")
+  Optional<String> bodyHtml();
 
   /** User. */
   @Nullable

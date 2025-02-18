@@ -203,7 +203,7 @@ public class GitHubClientTest {
     RepositoryInvitation invitation = future.get();
     assertThat(requestCapture.getValue().method(), is("PUT"));
     assertThat(requestCapture.getValue().url().toString(), is("http://bogus/collaborators/"));
-    assertThat(invitation.id(), is(1));
+    assertThat(invitation.id(), is(1L));
   }
 
   @Test

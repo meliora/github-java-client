@@ -109,7 +109,7 @@ public class RepositoryClientTest {
         completedFuture(json.fromJson(getFixture("repository_get.json"), Repository.class));
     when(github.request("/repos/someowner/somerepo", Repository.class)).thenReturn(fixture);
     final Repository repository = repoClient.getRepository().get();
-    assertThat(repository.id(), is(1296269));
+    assertThat(repository.id(), is(1296269L));
     assertUser(repository.owner());
     assertThat(repository.name(), is("Hello-World"));
     assertThat(repository.fullName(), is(repository.owner().login() + "/Hello-World"));
@@ -127,7 +127,7 @@ public class RepositoryClientTest {
     RepositoryUpdate request =
         ImmutableRepositoryUpdate.builder().allowAutoMerge(Optional.of(true)).build();
     final Repository repository = repoClient.updateRepository(request).get();
-    assertThat(repository.id(), is(1296269));
+    assertThat(repository.id(), is(1296269L));
     assertUser(repository.owner());
     assertThat(repository.name(), is("Hello-World"));
     assertThat(repository.fullName(), is(repository.owner().login() + "/Hello-World"));
@@ -142,7 +142,7 @@ public class RepositoryClientTest {
         completedFuture(json.fromJson(getFixture("list_of_repos_for_org.json"), LIST_REPOSITORY));
     when(github.request("/orgs/someowner/repos", LIST_REPOSITORY)).thenReturn(fixture);
     final List<Repository> repositories = repoClient.listOrganizationRepositories().get();
-    assertThat(repositories.get(0).id(), is(1296269));
+    assertThat(repositories.get(0).id(), is(1296269L));
     assertThat(repositories.size(), is(1));
   }
 
@@ -161,7 +161,7 @@ public class RepositoryClientTest {
     final List<Repository> repositories =
         Async.streamFromPaginatingIterable(pageIterator).collect(Collectors.toList());
 
-    assertThat(repositories.get(0).id(), is(1296269));
+    assertThat(repositories.get(0).id(), is(1296269L));
     assertThat(repositories.size(), is(1));
   }
 
@@ -196,9 +196,9 @@ public class RepositoryClientTest {
 
     assertTrue(maybeInvite.isPresent());
     final RepositoryInvitation repoInvite = maybeInvite.get();
-    assertThat(repoInvite.id(), is(1));
+    assertThat(repoInvite.id(), is(1L));
     assertThat(repoInvite.nodeId(), is("MDEwOlJlcG9zaXRvcnkxMjk2MjY5"));
-    assertThat(repoInvite.repository().id(), is(1296269));
+    assertThat(repoInvite.repository().id(), is(1296269L));
     assertUser(repoInvite.repository().owner());
     assertUser(repoInvite.invitee());
     assertUser(repoInvite.inviter());
@@ -539,7 +539,7 @@ public class RepositoryClientTest {
         .thenReturn(fixture);
     final Comment comment = repoClient.createComment("someweirdsha", "Me too").join();
 
-    assertThat(comment.id(), is(123));
+    assertThat(comment.id(), is(123L));
     assertThat(comment.commitId().get(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
   }
 
@@ -551,7 +551,7 @@ public class RepositoryClientTest {
         .thenReturn(fixture);
     final Comment comment = repoClient.getComment(123).join();
 
-    assertThat(comment.id(), is(123));
+    assertThat(comment.id(), is(123L));
     assertThat(comment.commitId().get(), is("6dcb09b5b57875f334f61aebed695e2e4193db5e"));
   }
 
@@ -640,7 +640,7 @@ public class RepositoryClientTest {
         .thenReturn(okResponse);
 
     final Repository repo = repoClient.createFork(null).join();
-    assertThat(repo.id(), is(1296269));
+    assertThat(repo.id(), is(1296269L));
   }
 
   @Test

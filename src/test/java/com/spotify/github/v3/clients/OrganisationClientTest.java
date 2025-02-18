@@ -68,7 +68,7 @@ public class OrganisationClientTest {
         completedFuture(json.fromJson(getFixture("team_get.json"), Team.class));
     when(github.request("/orgs/github/teams/justice-league", Team.class)).thenReturn(fixture);
     final Team team = teamClient.getTeam("justice-league").get();
-    assertThat(team.id(), is(1));
+    assertThat(team.id(), is(1L));
     assertThat(team.name(), is("Justice League"));
   }
 
