@@ -20,22 +20,29 @@
 
 package com.spotify.github.v3.clients;
 
-import static com.spotify.github.v3.clients.GitHubClient.IGNORE_RESPONSE_CONSUMER;
-import static com.spotify.github.v3.clients.GitHubClient.LIST_COMMENT_TYPE_REFERENCE;
-
 import com.google.common.collect.ImmutableMap;
 import com.spotify.github.async.AsyncPage;
+import com.spotify.github.v3.AttachmentFile;
+import com.spotify.github.v3.ImmutableAttachmentFile;
 import com.spotify.github.v3.comment.Comment;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import com.spotify.github.v3.issues.Issue;
+import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.HttpHeaders;
+
+import static com.spotify.github.v3.clients.GitHubClient.*;
 
 /** Issue API client */
 public class IssueClient {
@@ -149,6 +156,40 @@ public class IssueClient {
         application/vnd.github.full+json: Returns raw, text, and HTML representations. Response will include body, body_text, and body_html.
      */
     return github.request(path, Issue.class, Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json"));
+  }
+
+  /**
+   * Fetches an attachment file linked to an issue.
+   *
+   * @param url absolute url for the file, most often parsed from the body_html content
+   * @param personalAccessToken personal access token to use to fetch, always mandatory for atleast private repositories
+   * @return attachment file
+   */
+  public CompletableFuture<AttachmentFile> getIssueAttachment(final String url, final String personalAccessToken) {
+    log.info("Fetching attachment from " + url);
+    if (!url.toLowerCase().startsWith("https://") && !url.toLowerCase().startsWith("http://")) {
+      throw new IllegalArgumentException("must use absolute urls for issue attachments");
+    }
+    Map<String, String> headers = new HashMap<>();
+    if (personalAccessToken != null) {
+      headers.put(HttpHeaders.AUTHORIZATION, "token " + personalAccessToken);
+    }
+    headers.put(HttpHeaders.ACCEPT, "application/octet-stream");
+    return github.request(url, headers).thenApply(response -> {
+        try (ResponseBody body = response.body()) {
+            if (body == null) {
+              throw new IOException("No response body.");
+            }
+            return ImmutableAttachmentFile.builder()
+                    .contentLength(body.contentLength())
+                    .charset(body.contentType() != null ? body.contentType().charset() : null)
+                    .contentType(body.contentType() != null ? body.contentType().toString() : "application/octet-stream")
+                    .bytes(body.bytes())
+                    .build();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed getting response body for: " + response, e);
+        }
+    });
   }
 
 }

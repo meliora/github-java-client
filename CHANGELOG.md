@@ -13,3 +13,6 @@ All notable changes to this fork will be documented in this file.
 - use correct mediatype in issueclient to fetch body, body_html and body_text for issues and comments
 - add User.email, User.name, Issue.state_reason, Issue.closed_by
 - add body_html and body_text to Issue and Comment, make int id()'s Long in various places
+
+- GitHubClient: add capability to call absolute urls with !json content, make it possible to override AUTHORIZATION header via extraHeaders
+- add IssueClient.getIssueAttachment to fetch a absolutely (issue or comment) linked attachment file with possible personal access token override (adds AttachmentFile.java)
