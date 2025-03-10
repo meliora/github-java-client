@@ -26,6 +26,7 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.failedFuture;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +37,7 @@ import com.google.common.io.Resources;
 import com.spotify.github.Tracer;
 import com.spotify.github.v3.checks.CheckSuiteResponseList;
 import com.spotify.github.v3.checks.Installation;
+import com.spotify.github.v3.exceptions.RateLimitException;
 import com.spotify.github.v3.exceptions.ReadOnlyRepositoryException;
 import com.spotify.github.v3.exceptions.RequestNotOkException;
 import com.spotify.github.v3.repos.CommitItem;
@@ -47,6 +49,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -173,6 +178,94 @@ public class GitHubClientTest {
       assertThat(e1.getMessage(), containsString("/repos/testorg/testrepo/merges"));
       assertThat(e1.getMessage(), containsString("Merge Conflict"));
       assertThat(e1.getRawMessage(), containsString("Merge Conflict"));
+    }
+  }
+
+  @Test
+  public void testRateLimitException() throws Throwable {
+    final Call call = mock(Call.class);
+    final ArgumentCaptor<Callback> capture = ArgumentCaptor.forClass(Callback.class);
+    doNothing().when(call).enqueue(capture.capture());
+
+    Instant twoMinutesFromNow = Instant.now().plusSeconds(120);
+
+    final Response response = new okhttp3.Response.Builder()
+            .code(429) // Too many requests
+            .headers(Headers.of("x-ratelimit-remaining", "0", "x-ratelimit-reset", "" + twoMinutesFromNow.getEpochSecond()))
+            .body(
+                    ResponseBody.create(
+                            MediaType.get("application/json"),
+                            "{\n  \"message\": \"Anything really as code is 429\"\n}"
+                    ))
+            .message("")
+            .protocol(Protocol.HTTP_1_1)
+            .request(new Request.Builder().url("http://localhost/").build())
+            .build();
+
+    when(client.newCall(any())).thenReturn(call);
+    RepositoryClient repoApi = github.createRepositoryClient("testorg", "testrepo");
+
+    CompletableFuture<Optional<CommitItem>> future = repoApi.merge("basebranch", "headbranch");
+    capture.getValue().onResponse(call, response);
+    try {
+      future.get();
+      Assertions.fail("Did not throw");
+    } catch (ExecutionException e) {
+      assertThat(e.getCause() instanceof RateLimitException, is(true));
+      RateLimitException e1 = (RateLimitException) e.getCause();
+      assertThat(e1.getRateLimitReset().toString(), is(Date.from(twoMinutesFromNow).toString()));
+      assertThat(e1.statusCode(), is(429));
+      assertThat(e1.method(), is("POST"));
+      assertThat(e1.path(), is("/repos/testorg/testrepo/merges"));
+      assertThat(e1.headers(), hasEntry("x-ratelimit-remaining", List.of("0")));
+      assertThat(e1.headers(), hasEntry("x-ratelimit-reset", List.of("" + twoMinutesFromNow.getEpochSecond())));
+      assertThat(e1.getMessage(), containsString("POST"));
+      assertThat(e1.getMessage(), containsString("/repos/testorg/testrepo/merges"));
+      assertThat(e1.getMessage(), containsString("Anything really"));
+      assertThat(e1.getRawMessage(), containsString("Anything really"));
+    }
+  }
+
+  @Test
+  public void testRateLimitExceptionWith403AndNoResetHeader() throws Throwable {
+    final Call call = mock(Call.class);
+    final ArgumentCaptor<Callback> capture = ArgumentCaptor.forClass(Callback.class);
+    doNothing().when(call).enqueue(capture.capture());
+
+    final Response response = new okhttp3.Response.Builder()
+            .code(403) // Too many requests
+            .headers(Headers.of("x-ratelimit-remaining", "0"))
+            .body(
+                    ResponseBody.create(
+                            MediaType.get("application/json"),
+                            "{\n  \"message\": \"API rate limit exceeded\"\n}"
+                    ))
+            .message("")
+            .protocol(Protocol.HTTP_1_1)
+            .request(new Request.Builder().url("http://localhost/").build())
+            .build();
+
+    when(client.newCall(any())).thenReturn(call);
+    RepositoryClient repoApi = github.createRepositoryClient("testorg", "testrepo");
+
+    CompletableFuture<Optional<CommitItem>> future = repoApi.merge("basebranch", "headbranch");
+    capture.getValue().onResponse(call, response);
+    try {
+      future.get();
+      Assertions.fail("Did not throw");
+    } catch (ExecutionException e) {
+      assertThat(e.getCause() instanceof RateLimitException, is(true));
+      RateLimitException e1 = (RateLimitException) e.getCause();
+      // "about a minute from now"
+      assertThat((int)Instant.now().until(e1.getRateLimitReset().toInstant(), ChronoUnit.SECONDS), is(both(greaterThan(59)).and(lessThan(63))));
+      assertThat(e1.statusCode(), is(403));
+      assertThat(e1.method(), is("POST"));
+      assertThat(e1.path(), is("/repos/testorg/testrepo/merges"));
+      assertThat(e1.headers(), hasEntry("x-ratelimit-remaining", List.of("0")));
+      assertThat(e1.getMessage(), containsString("POST"));
+      assertThat(e1.getMessage(), containsString("/repos/testorg/testrepo/merges"));
+      assertThat(e1.getMessage(), containsString("API rate limit exceeded"));
+      assertThat(e1.getRawMessage(), containsString("API rate limit exceeded"));
     }
   }
 

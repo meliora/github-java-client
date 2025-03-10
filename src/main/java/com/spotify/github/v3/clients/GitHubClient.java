@@ -32,6 +32,7 @@ import com.spotify.github.v3.User;
 import com.spotify.github.v3.checks.AccessToken;
 import com.spotify.github.v3.checks.Installation;
 import com.spotify.github.v3.comment.Comment;
+import com.spotify.github.v3.exceptions.RateLimitException;
 import com.spotify.github.v3.exceptions.ReadOnlyRepositoryException;
 import com.spotify.github.v3.exceptions.RequestNotOkException;
 import com.spotify.github.v3.git.Reference;
@@ -49,11 +50,9 @@ import com.spotify.github.v3.repos.RepositoryInvitation;
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
+import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,7 +71,6 @@ import org.slf4j.LoggerFactory;
  * functionality as well as acts as a factory for the higher level API clients.
  */
 public class GitHubClient {
-
   private static final int EXPIRY_MARGIN_IN_MINUTES = 5;
   private static final int HTTP_NOT_FOUND = 404;
 
@@ -120,6 +118,11 @@ public class GitHubClient {
   private static final int PERMANENT_REDIRECT = 301;
   private static final int TEMPORARY_REDIRECT = 307;
   private static final int FORBIDDEN = 403;
+  private static final int TOO_MANY_REQUESTS = 429;
+
+  public static final String HEADER_RATELIMIT_REMAINING = "x-ratelimit-remaining";
+  public static final String HEADER_RATELIMIT_RESET = "x-ratelimit-reset";
+  public static final int DEFAULT_RATELIMIT_RESET_SECONDS = 61;
 
   private final URI baseUrl;
 
@@ -413,6 +416,10 @@ public class GitHubClient {
 
   public Optional<String> getAccessToken() {
     return Optional.ofNullable(token);
+  }
+
+  public OkHttpClient getClient() {
+    return client;
   }
 
   /**
@@ -981,9 +988,37 @@ public class GitHubClient {
     String bodyString = res.body() != null ? res.body().string() : "";
     Map<String, List<String>> headersMap = res.headers().toMultimap();
 
+    boolean isRateLimitError = false;
     if (res.code() == FORBIDDEN) {
       if (bodyString.contains("Repository was archived so is read-only")) {
         return new ReadOnlyRepositoryException(request.method(), request.url().encodedPath(), res.code(), bodyString, headersMap);
+      }
+      isRateLimitError = bodyString.toLowerCase().contains("rate limit");
+    } else if (res.code() == TOO_MANY_REQUESTS) {
+      isRateLimitError = true;
+    }
+
+    if (isRateLimitError) {
+      /*
+        If you exceed your primary rate limit, you will receive a 403 or 429 response,
+        and the x-ratelimit-remaining header will be 0. You should not retry your request
+        until after the time specified by the x-ratelimit-reset header.
+
+        If the x-ratelimit-remaining header is 0, you should not retry your request until after the time,
+        in UTC epoch seconds, specified by the x-ratelimit-reset header. Otherwise,
+        wait for at least one minute before retrying.
+       */
+      String rateLimitRemaining = res.header(HEADER_RATELIMIT_REMAINING);
+      if ("0".equals(rateLimitRemaining)) {
+        // The time at which the current rate limit window resets, in UTC epoch seconds
+        Date resetAt;
+        String rateLimitReset = res.header(HEADER_RATELIMIT_RESET);
+        if (rateLimitReset != null) {
+          resetAt = Date.from(Instant.ofEpochSecond(Long.parseLong(rateLimitReset)));
+        } else {
+          resetAt = Date.from(Instant.now().plusSeconds(DEFAULT_RATELIMIT_RESET_SECONDS));
+        }
+        throw new RateLimitException(request.method(), request.url().encodedPath(), res.code(), bodyString, headersMap, resetAt);
       }
     }
 

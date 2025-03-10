@@ -75,6 +75,15 @@ public class Json {
   }
 
   /**
+   * Returns the ObjectMapper in this Json.
+   *
+   * @return ObjectMapper
+   */
+  public ObjectMapper getMapper() {
+    return mapper;
+  }
+
+  /**
    * Serialize an object to a json string. Use when you don't know if object is serializable.
    *
    * @param value The object to serialize.

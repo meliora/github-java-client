@@ -16,3 +16,9 @@ All notable changes to this fork will be documented in this file.
 
 - GitHubClient: add capability to call absolute urls with !json content, make it possible to override AUTHORIZATION header via extraHeaders
 - add IssueClient.getIssueAttachment to fetch a absolutely (issue or comment) linked attachment file with possible personal access token override (adds AttachmentFile.java)
+
+- move labels() from PullRequest to PullRequestItem
+
+- Installation: annotate fields nullable as minimal variants are encountered
+- impl RateLimitException to the client
+- impl WebhookRequestBody to support incoming hooks

@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 import org.immutables.value.Value;
 
+import javax.annotation.Nullable;
+
 /**
  * The App Installation object.
  *
@@ -50,6 +52,7 @@ public interface Installation {
    *
    * @return the user
    */
+  @Nullable
   User account();
 
   /**
@@ -57,6 +60,7 @@ public interface Installation {
    *
    * @return the url string
    */
+  @Nullable
   String accessTokensUrl();
 
   /**
@@ -64,6 +68,7 @@ public interface Installation {
    *
    * @return the url string
    */
+  @Nullable
   String repositoriesUrl();
 
   /**
@@ -71,6 +76,7 @@ public interface Installation {
    *
    * @return the optional url
    */
+  @Nullable
   Optional<String> htmlUrl();
 
   /**
@@ -78,20 +84,23 @@ public interface Installation {
    *
    * @return the int
    */
-  int appId();
+  @Nullable
+  Integer appId();
 
   /**
    * The ID of the entity it is installed on. Usually a repo.
    *
    * @return the int
    */
-  int targetId();
+  @Nullable
+  Integer targetId();
 
   /**
    * Target type. Can be Organization.
    *
    * @return the string
    */
+  @Nullable
   String targetType();
 
   /**
@@ -99,6 +108,7 @@ public interface Installation {
    *
    * @return the map
    */
+  @Nullable
   Map<String, String> permissions();
 
   /**
@@ -106,6 +116,7 @@ public interface Installation {
    *
    * @return the list
    */
+  @Nullable
   List<String> events();
 
   /**
@@ -113,6 +124,7 @@ public interface Installation {
    *
    * @return the optional
    */
+  @Nullable
   Optional<String> singleFileName();
 
   /**
@@ -121,5 +133,6 @@ public interface Installation {
    *
    * @return the optional string
    */
+  @Nullable
   Optional<String> repositorySelection();
 }

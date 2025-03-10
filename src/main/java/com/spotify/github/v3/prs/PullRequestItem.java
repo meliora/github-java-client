@@ -32,6 +32,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+
+import com.spotify.github.v3.issues.Label;
 import org.immutables.value.Value;
 
 /** Pull request item resource represents data returned during pull request list operation */
@@ -145,4 +147,7 @@ public interface PullRequestItem extends CloseTracking {
 
   /** @Deprecated the merge commit sha. */
   Optional<String> mergeCommitSha();
+
+  @Nullable
+  List<Label> labels();
 }
