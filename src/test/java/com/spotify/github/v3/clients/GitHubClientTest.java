@@ -268,7 +268,7 @@ public class GitHubClientTest {
       assertThat(e1.getRawMessage(), containsString("API rate limit exceeded"));
     }
   }
-
+  
   @Test
   public void testPutConvertsToClass() throws Throwable {
     final Call call = mock(Call.class);

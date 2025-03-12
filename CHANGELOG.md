@@ -23,4 +23,4 @@ All notable changes to this fork will be documented in this file.
 - impl RateLimitException to the client
 - impl WebhookRequestBody to support incoming hooks
 
-- impl UserClient.getInstallationsWithUserAccessToken
+- impl oauth.UserAccessTokensClient for fetching UserAccessTokens with oauth codes (needed for app install flow)
