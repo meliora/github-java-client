@@ -86,6 +86,12 @@ public interface PullRequestItem extends CloseTracking {
   /** The contents of the pull request. */
   Optional<String> body();
 
+  @JsonProperty("body_text")
+  Optional<String> bodyText();
+
+  @JsonProperty("body_html")
+  Optional<String> bodyHtml();
+
   /** Assignee. */
   Optional<User> assignee();
 

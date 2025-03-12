@@ -861,7 +861,11 @@ public class GitHubClient {
       throw new IllegalStateException("This endpoint needs a client with a private key for an App");
     }
     if (getAccessToken().isPresent()) {
-      return String.format("token %s", token);
+      if (isUserAccessTokenRequest(path)) {
+        return String.format("Bearer %s", token);
+      } else {
+        return String.format("token %s", token);
+      }
     } else if (getPrivateKey().isPresent()) {
       final String jwtToken;
       try {
@@ -885,7 +889,11 @@ public class GitHubClient {
   }
 
   private boolean isJwtRequest(final String path) {
-    return path.startsWith("/app/installation") || path.endsWith("installation");
+    return !isUserAccessTokenRequest(path) && (path.startsWith("/app/installation") || path.endsWith("installation"));
+  }
+
+  private boolean isUserAccessTokenRequest(final String path) {
+    return path.startsWith("/user/installations");
   }
 
   private String getInstallationToken(final String jwtToken, final int installationId)

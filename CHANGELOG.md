@@ -22,3 +22,5 @@ All notable changes to this fork will be documented in this file.
 - Installation: annotate fields nullable as minimal variants are encountered
 - impl RateLimitException to the client
 - impl WebhookRequestBody to support incoming hooks
+
+- impl UserClient.getInstallationsWithUserAccessToken

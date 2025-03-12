@@ -20,12 +20,15 @@
 
 package com.spotify.github.v3.clients;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.spotify.github.v3.User;
+import com.spotify.github.v3.checks.Installation;
 import com.spotify.github.v3.user.requests.SuspensionReason;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class UserClient {
@@ -36,8 +39,12 @@ public class UserClient {
 
   private static final String SUSPEND_USER_TEMPLATE = "/users/%s/suspended";
   private static final String USERS_URI_USERNAME_TEMPLATE = "/users/%s";
+  private static final String GET_INSTALLATIONS_WITH_USER_ACCESS_TOKEN = "/user/installations";
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  private static final TypeReference<List<Installation>> INSTALLATION_LIST_TYPE_REFERENCE =
+          new TypeReference<>() {};
 
   UserClient(final GitHubClient github, final String owner) {
     this.github = github;
@@ -90,6 +97,17 @@ public class UserClient {
     final String path = String.format(USERS_URI_USERNAME_TEMPLATE, username);
     log.info("Fetching user from " + path);
     return github.request(path, User.class);
+  }
+
+  /**
+   * List app installations accessible to the user access token.
+   *
+   * The client this is called must be set up with user access token.
+   *
+   * @return a list of Installation
+   */
+  public CompletableFuture<List<Installation>> getInstallationsWithUserAccessToken() {
+    return github.request(GET_INSTALLATIONS_WITH_USER_ACCESS_TOKEN, INSTALLATION_LIST_TYPE_REFERENCE);
   }
 
 }
