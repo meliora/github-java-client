@@ -24,3 +24,5 @@ All notable changes to this fork will be documented in this file.
 - impl WebhookRequestBody to support incoming hooks
 
 - impl oauth.UserAccessTokensClient for fetching UserAccessTokens with oauth codes (needed for app install flow)
+- impl WrappedGithubPage to support paging when the array is wrapped in an attribute
+- impl UserClient.getInstallationsWithUserAccessToken

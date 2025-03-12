@@ -139,7 +139,7 @@ public class GithubPage<T> implements AsyncPage<T> {
                   Optional.ofNullable(linkMap.get("next"))
                       .map(nextLink -> nextLink.url().toString().replaceAll(github.urlFor(""), ""))
                       .orElseThrow(() -> new NoSuchElementException("Page iteration exhausted"));
-              return new GithubPage<>(github, nextPath, typeReference, extraHeaders);
+              return create(github, nextPath, typeReference, extraHeaders);
             });
   }
 
@@ -152,7 +152,7 @@ public class GithubPage<T> implements AsyncPage<T> {
   /** {@inheritDoc} */
   @Override
   public AsyncPage<T> clone() {
-    return new GithubPage<>(github, path, typeReference, extraHeaders);
+    return create(github, path, typeReference, extraHeaders);
   }
 
   /** {@inheritDoc} */
@@ -164,9 +164,28 @@ public class GithubPage<T> implements AsyncPage<T> {
             response ->
                 github
                     .json()
-                    .fromJsonUncheckedNotNull(responseBodyUnchecked(response), typeReference))
+                    .fromJsonUncheckedNotNull(getPageArrayBody(response), typeReference))
         .join()
         .iterator();
+  }
+
+
+ /**
+  * Override point.
+  *
+  * @return returns the [...] part of the response - defaults to returning whole body from the response
+  */
+  public String getPageArrayBody(final Response response) {
+      return responseBodyUnchecked(response);
+  }
+
+ /**
+  * Override point.
+  *
+  * @return new instance of this for parameters
+  */
+  public GithubPage<T> create(final GitHubClient github, final String path, final TypeReference<List<T>> typeReference, final Map<String, String> extraHeaders) {
+      return new GithubPage<>(github, path, typeReference, extraHeaders);
   }
 
   private CompletableFuture<Map<String, Link>> linkMapAsync() {

@@ -21,6 +21,7 @@
 package com.spotify.github.v3.clients;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.spotify.github.async.AsyncPage;
 import com.spotify.github.v3.User;
 import com.spotify.github.v3.checks.Installation;
 import com.spotify.github.v3.user.requests.SuspensionReason;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -106,8 +108,10 @@ public class UserClient {
    *
    * @return a list of Installation
    */
-  public CompletableFuture<List<Installation>> getInstallationsWithUserAccessToken() {
-    return github.request(GET_INSTALLATIONS_WITH_USER_ACCESS_TOKEN, INSTALLATION_LIST_TYPE_REFERENCE);
+  public Iterator<AsyncPage<Installation>> getInstallationsWithUserAccessToken() {
+    return new GithubPageIterator<>(
+            new WrappedGithubPage<>(github, GET_INSTALLATIONS_WITH_USER_ACCESS_TOKEN, INSTALLATION_LIST_TYPE_REFERENCE, "installations")
+    );
   }
 
 }

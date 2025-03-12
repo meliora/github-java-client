@@ -43,28 +43,39 @@ public class UserAccessTokensClient {
 
     private final OkHttpClient client;
     private URI baseUrl;
+    private String clientId;
+    private String clientSecret;
 
     String urlFor(final String path) {
         return baseUrl.toString().replaceAll("/+$", "") + "/" + path.replaceAll("^/+", "");
     }
 
-    private UserAccessTokensClient(final OkHttpClient client, final URI baseUrl) {
+    private UserAccessTokensClient(final OkHttpClient client, final URI baseUrl, final String clientId, final String clientSecret) {
         this.client = client;
         this.baseUrl = baseUrl;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+    }
+
+    /**
+     * @return UserAccessTokensClient with custom client to URI with client identity
+     */
+    public static UserAccessTokensClient create(final OkHttpClient client, final URI baseUrl, final String clientId, final String clientSecret) {
+        return new UserAccessTokensClient(client, baseUrl, clientId, clientSecret);
     }
 
     /**
      * @return UserAccessTokensClient with custom client to URI
      */
     public static UserAccessTokensClient create(final OkHttpClient client, final URI baseUrl) {
-        return new UserAccessTokensClient(client, baseUrl);
+        return new UserAccessTokensClient(client, baseUrl, null, null);
     }
 
     /**
      * @return default UserAccessTokensClient to URI
      */
     public static UserAccessTokensClient create(final URI baseUrl) {
-        return new UserAccessTokensClient(new OkHttpClient(), baseUrl);
+        return new UserAccessTokensClient(new OkHttpClient(), baseUrl, null, null);
     }
 
     /**
@@ -72,14 +83,28 @@ public class UserAccessTokensClient {
      */
     public static UserAccessTokensClient create() {
         try {
-            return new UserAccessTokensClient(new OkHttpClient(), new URI("https://github.com"));
+            return new UserAccessTokensClient(new OkHttpClient(), new URI("https://github.com"), null, null);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public UserAccessToken generateUserAccessToken(final String oAuthCode) throws Exception {
+        return generateUserAccessToken(clientId, clientSecret, oAuthCode);
+    }
+
     public UserAccessToken generateUserAccessToken(final String clientId, final String clientSecret, final String oAuthCode) throws Exception {
         log.info("generateUserAccessToken: {}", oAuthCode);
+
+        if (clientId == null) {
+            throw new IllegalArgumentException("generateUserAccessToken: no client id.");
+        }
+        if (clientSecret == null) {
+            throw new IllegalArgumentException("generateUserAccessToken: no client secret.");
+        }
+        if (oAuthCode == null) {
+            throw new IllegalArgumentException("generateUserAccessToken: no code.");
+        }
 
         final String url = urlFor(GET_USER_ACCESS_TOKEN_URL);
         final Request request =
