@@ -32,7 +32,7 @@ import java.net.URISyntaxException;
 /**
  * Capable of generating user access tokens with oauth codes.
  *
- * TODO: refresh logic, in the mean time we get by with non-refreshed ones
+ * TODO refresh logic, in the mean time we get by with non-refreshed ones
  *
  * @author Marko Kanala, Meliora Ltd (marko.kanala@meliora.fi)
  */
