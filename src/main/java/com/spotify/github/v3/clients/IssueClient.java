@@ -69,6 +69,14 @@ public class IssueClient {
     return new IssueClient(github, owner, repo);
   }
 
+  public String getOwner() {
+    return owner;
+  }
+
+  public String getRepo() {
+    return repo;
+  }
+
   /**
    * List repository comments.
    *

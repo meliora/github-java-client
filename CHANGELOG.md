@@ -26,3 +26,5 @@ All notable changes to this fork will be documented in this file.
 - impl oauth.UserAccessTokensClient for fetching UserAccessTokens with oauth codes (needed for app install flow)
 - impl WrappedGithubPage to support paging when the array is wrapped in an attribute
 - impl UserClient.getInstallationsWithUserAccessToken
+
+- impl GraphQLClient: a crude implementation to run graphql queries against repository data with untyped response structures

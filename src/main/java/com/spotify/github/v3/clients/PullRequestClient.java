@@ -70,6 +70,14 @@ public class PullRequestClient {
     return new PullRequestClient(github, owner, repo);
   }
 
+  public String getOwner() {
+    return owner;
+  }
+
+  public String getRepo() {
+    return repo;
+  }
+
   /**
    * List repository pull request.
    *

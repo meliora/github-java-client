@@ -313,6 +313,26 @@ public class GitHubClient {
   }
 
   /**
+   * Create a github api client with a given base URL, graphql URL  and a path to a key.
+   *
+   * @param httpClient an instance of OkHttpClient
+   * @param baseUrl base URL
+   * @param graphqlUrl graphql URL
+   * @param privateKey the private key as byte array
+   * @param appId the github app ID
+   * @return github api client
+   */
+  public static GitHubClient create(
+          final OkHttpClient httpClient,
+          final URI baseUrl,
+          final URI graphqlUrl,
+          final byte[] privateKey,
+          final Integer appId,
+          final Integer installationId) {
+    return new GitHubClient(httpClient, baseUrl, graphqlUrl, null, privateKey, appId, installationId);
+  }
+
+  /**
    * Create a github api client with a given base URL and authorization token.
    *
    * @param httpClient an instance of OkHttpClient
@@ -692,6 +712,21 @@ public class GitHubClient {
             .build();
     log.info("Making POST request to {}", request.url());
     return call(request);
+  }
+
+  /**
+   * Make a POST request to the graphql endpoint of Github
+   *
+   * @param data request body as stringified JSON
+   * @param clazz class to cast response as
+   * @return response
+   *
+   * @see "https://docs.github.com/en/enterprise-server@3.9/graphql/guides/forming-calls-with-graphql#communicating-with-graphql"
+   */
+  <T> CompletableFuture<T> postGraphql(final String data, final Class<T> clazz) {
+    return postGraphql(data)
+            .thenApply(
+                    response -> json().fromJsonUncheckedNotNull(responseBodyUnchecked(response), clazz));
   }
 
   /**

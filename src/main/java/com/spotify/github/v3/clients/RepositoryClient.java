@@ -111,6 +111,18 @@ public class RepositoryClient {
     return new RepositoryClient(github, owner, repo);
   }
 
+  public String getOwner() {
+    return owner;
+  }
+
+  public String getRepo() {
+    return repo;
+  }
+  
+  public GraphQLClient createGraphQLClient() {
+    return GraphQLClient.create(github, owner, repo);
+  }
+
   /**
    * Create an issue API client.
    *
