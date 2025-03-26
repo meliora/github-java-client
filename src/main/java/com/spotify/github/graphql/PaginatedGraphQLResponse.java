@@ -25,21 +25,27 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.spotify.github.GithubStyle;
 import org.immutables.value.Value;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
- * Basic GraphQL query object.
+ * Paginated GraphQL response.
  *
  * @author Marko Kanala, Meliora Ltd (marko.kanala@meliora.fi)
  */
 @Value.Immutable
 @GithubStyle
-@JsonSerialize(as = ImmutableGraphQLQuery.class)
-@JsonDeserialize(as = ImmutableGraphQLQuery.class)
-public interface GraphQLQuery {
-    String query();
-
-    @Nullable
+@JsonSerialize(as = ImmutablePaginatedGraphQLResponse.class)
+@JsonDeserialize(as = ImmutablePaginatedGraphQLResponse.class)
+public interface PaginatedGraphQLResponse extends GraphQLResponse {
+    // original query & params, non-modified
+    String originalQuery();
+    int resultsPerPage();
     Map<String, Object> variables();
+
+    // graphql pageInfo from (previous) request
+    GraphQLPageInfo pageInfo();
+    
+    default boolean hasNextPage() {
+        return pageInfo() != null && pageInfo().hasNextPage();
+    }
 }

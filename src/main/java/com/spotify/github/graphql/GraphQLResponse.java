@@ -87,4 +87,62 @@ public interface GraphQLResponse {
         return getDataRecurse(current, parts, index + 1);
     }
 
+    /**
+     * Return pageInfo from a path such as "repository.pullRequest.closingIssuesReferences". Automatically
+     * appends ".pageInfo" to the provided path.
+     *
+     * @param path object path to peek for peekInfo
+     * @return GraphQLPageInfo, null if not present
+     */
+    default GraphQLPageInfo getPageInfo(String path) {
+        return asPageInfo((Map) getData(path + ".pageInfo"));
+    }
+
+    /**
+     * Finds a pageInfo object from the returned object graph. First found is returned.
+     *
+     * @return GraphQLPageInfo or null if not found
+     */
+    default GraphQLPageInfo findPageInfo() {
+        return findPageInfo(data());
+    }
+
+    private static GraphQLPageInfo findPageInfo(Map data) {
+        if (data != null) {
+            if (data.containsKey("pageInfo")) {
+                return asPageInfo((Map) data.get("pageInfo"));
+            }
+            for (Object value : data.values()) {
+                if (value instanceof Map) {
+                    GraphQLPageInfo pageInfo = findPageInfo((Map) value);
+                    if (pageInfo != null) {
+                        return pageInfo;
+                    }
+                } else if (value instanceof List) {
+                    for (Object item : (List<?>) value) {
+                        if (item instanceof Map) {
+                            GraphQLPageInfo pageInfo = findPageInfo((Map) item);
+                            if (pageInfo != null) {
+                                return pageInfo;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static GraphQLPageInfo asPageInfo(Map node) {
+        if (node != null) {
+            Boolean hasPreviousPage = (Boolean) node.get("hasPreviousPage");
+            Boolean hasNextPage = (Boolean) node.get("hasNextPage");
+            return ImmutableGraphQLPageInfo.builder()
+                    .hasNextPage(hasNextPage != null && hasNextPage).hasPreviousPage(hasPreviousPage != null && hasPreviousPage)
+                    .endCursor((String) node.get("endCursor")).startCursor((String) node.get("startCursor"))
+                    .build();
+        }
+        return null;
+    }
+
 }

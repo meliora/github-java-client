@@ -26,20 +26,24 @@ import com.spotify.github.GithubStyle;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
 /**
- * Basic GraphQL query object.
+ * GraphQL pageInfo object.
  *
  * @author Marko Kanala, Meliora Ltd (marko.kanala@meliora.fi)
  */
 @Value.Immutable
 @GithubStyle
-@JsonSerialize(as = ImmutableGraphQLQuery.class)
-@JsonDeserialize(as = ImmutableGraphQLQuery.class)
-public interface GraphQLQuery {
-    String query();
+@JsonSerialize(as = ImmutableGraphQLPageInfo.class)
+@JsonDeserialize(as = ImmutableGraphQLPageInfo.class)
+public interface GraphQLPageInfo {
+
+    boolean hasNextPage();
+    boolean hasPreviousPage();
 
     @Nullable
-    Map<String, Object> variables();
+    String startCursor();
+    @Nullable
+    String endCursor();
+
 }

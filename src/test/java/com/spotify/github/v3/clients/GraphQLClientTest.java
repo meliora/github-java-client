@@ -20,6 +20,7 @@
 
 package com.spotify.github.v3.clients;
 
+import com.spotify.github.graphql.GraphQLPageInfo;
 import com.spotify.github.graphql.GraphQLResponse;
 import com.spotify.github.jackson.Json;
 import okhttp3.Response;
@@ -32,6 +33,7 @@ import static com.spotify.github.v3.clients.MockHelper.createMockResponse;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -60,9 +62,30 @@ public class GraphQLClientTest {
         when(github.postGraphql(anyString())).thenReturn(completedFuture(response));
 
         GraphQLResponse r = graphQLClient.executeRepositoryQuery(
-                "pullRequest(number:3) { id, closingIssuesReferences (first:50) { edges { node { id body number title } } } } }"
+                "pullRequest(number:3) { id, closingIssuesReferences (first:50) { edges { node { id body number title } } } }"
         ).join();
 
         assertThat(r.getData("repository.pullRequest.closingIssuesReferences.edges[0].node.number"), is(2));
     }
+
+    @Test
+    public void testGraphQLRequestPageInfo() throws IOException {
+        final Response response = createMockResponse("",
+                "{\"data\":{\"repository\":{\"pullRequest\":{\"id\":\"PR_kwDOOGLqn86QCX0t\",\"closingIssuesReferences\":{\"edges\":[{\"node\":{\"id\":\"I_kwDOOGLqn86vnkny\",\"body\":\"feature description\",\"number\":2,\"title\":\"feature xyz\"}}],\"pageInfo\":{\"hasNextPage\":true,\"endCursor\":\"Y3Vyc29yOnYyOpHOF4rHRA==\"}}}}}}"
+        );
+
+        when(github.postGraphql(anyString(), eq(GraphQLResponse.class))).thenCallRealMethod();
+        when(github.postGraphql(anyString())).thenReturn(completedFuture(response));
+
+        GraphQLResponse r = graphQLClient.executeRepositoryQuery(
+                "pullRequest(number:3) { id, closingIssuesReferences (first:50) { edges { node { id body number title } } } }"
+        ).join();
+
+        assertThat(r.getData("repository.pullRequest.closingIssuesReferences.edges[0].node.number"), is(2));
+        GraphQLPageInfo pageInfo = r.getPageInfo("repository.pullRequest.closingIssuesReferences");
+        assertNotNull(pageInfo);
+        assertTrue(pageInfo.hasNextPage());
+        assertEquals("Y3Vyc29yOnYyOpHOF4rHRA==", pageInfo.endCursor());
+    }
+
 }
