@@ -28,3 +28,6 @@ All notable changes to this fork will be documented in this file.
 - impl UserClient.getInstallationsWithUserAccessToken
 
 - impl GraphQLClient: a crude implementation to run graphql queries against repository data with untyped response structures
+
+- use pagination in PullRequestClient.list
+

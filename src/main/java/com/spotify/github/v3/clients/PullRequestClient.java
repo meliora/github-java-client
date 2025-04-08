@@ -20,11 +20,7 @@
 
 package com.spotify.github.v3.clients;
 
-import static com.spotify.github.v3.clients.GitHubClient.IGNORE_RESPONSE_CONSUMER;
-import static com.spotify.github.v3.clients.GitHubClient.LIST_COMMIT_TYPE_REFERENCE;
-import static com.spotify.github.v3.clients.GitHubClient.LIST_PR_TYPE_REFERENCE;
-import static com.spotify.github.v3.clients.GitHubClient.LIST_REVIEW_REQUEST_TYPE_REFERENCE;
-import static com.spotify.github.v3.clients.GitHubClient.LIST_REVIEW_TYPE_REFERENCE;
+import static com.spotify.github.v3.clients.GitHubClient.*;
 import static java.util.Objects.isNull;
 
 import com.google.common.base.Strings;
@@ -37,6 +33,7 @@ import com.spotify.github.v3.prs.requests.PullRequestUpdate;
 import com.spotify.github.v3.repos.CommitItem;
 import java.io.Reader;
 import java.lang.invoke.MethodHandles;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +80,7 @@ public class PullRequestClient {
    *
    * @return pull requests
    */
-  public CompletableFuture<List<PullRequestItem>> list() {
+  public Iterator<AsyncPage<PullRequestItem>> list() {
     return list("");
   }
 
@@ -93,7 +90,7 @@ public class PullRequestClient {
    * @param parameters request parameters
    * @return pull requests
    */
-  public CompletableFuture<List<PullRequestItem>> list(final PullRequestParameters parameters) {
+  public Iterator<AsyncPage<PullRequestItem>> list(final PullRequestParameters parameters) {
     final String serial = parameters.serialize();
     final String path = Strings.isNullOrEmpty(serial) ? "" : "?" + serial;
     return list(path);
@@ -272,9 +269,12 @@ public class PullRequestClient {
         });
   }
 
-  private CompletableFuture<List<PullRequestItem>> list(final String parameterPath) {
+  private Iterator<AsyncPage<PullRequestItem>> list(final String parameterPath) {
     final String path = String.format(PR_TEMPLATE + parameterPath, owner, repo);
     log.debug("Fetching pull requests from " + path);
-    return github.request(path, LIST_PR_TYPE_REFERENCE);
+    return new GithubPageIterator<>(new GithubPage<>(
+            github, path, LIST_PR_TYPE_REFERENCE, Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json"))
+    );
   }
+  
 }
