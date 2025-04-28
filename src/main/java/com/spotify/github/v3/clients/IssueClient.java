@@ -51,7 +51,7 @@ public class IssueClient {
   static final String COMMENTS_URI_TEMPLATE = "/repos/%s/%s/issues/comments";
   static final String COMMENTS_URI_ID_TEMPLATE = "/repos/%s/%s/issues/comments/%s";
 
-  static final String ISSUES_URI_ID_TEMPLATE = "/repos/%s/%s/issues/%s";
+  static final String ISSUES_URI_NUMBER_TEMPLATE = "/repos/%s/%s/issues/%s";
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -154,11 +154,11 @@ public class IssueClient {
   /**
    * Get a specific issue.
    *
-   * @param id issue id
+   * @param number issue number
    * @return an issue
    */
-  public CompletableFuture<Issue> getIssue(final int id) {
-    final String path = String.format(ISSUES_URI_ID_TEMPLATE, owner, repo, id);
+  public CompletableFuture<Issue> getIssue(final long number) {
+    final String path = String.format(ISSUES_URI_NUMBER_TEMPLATE, owner, repo, number);
     log.info("Fetching issue from " + path);
     /*
         application/vnd.github.full+json: Returns raw, text, and HTML representations. Response will include body, body_text, and body_html.
