@@ -55,7 +55,7 @@ public interface Milestone extends CloseTracking {
 
   /** Number */
   @Nullable
-  Integer number();
+  Long number();
 
   /** The state of the milestone. Either open, closed, or all. */
   @Nullable

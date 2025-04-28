@@ -40,7 +40,7 @@ public class PullRequestEventTest {
             getResource(this.getClass(), "fixtures/pull_request_event.json"), defaultCharset());
     final PullRequestEvent prEvent = Json.create().fromJson(fixture, PullRequestEvent.class);
     assertThat(prEvent.action(), is(PullRequestActionState.OPENED));
-    assertThat(prEvent.number(), is(1));
+    assertThat(prEvent.number(), is(1L));
     assertThat(prEvent.eventInstallation().id(), is(1L));
   }
 }

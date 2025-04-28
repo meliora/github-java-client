@@ -92,7 +92,7 @@ public class IssueClient {
    * @param number issue number
    * @return comments
    */
-  public Iterator<AsyncPage<Comment>> listComments(final int number) {
+  public Iterator<AsyncPage<Comment>> listComments(final long number) {
     return listComments(String.format(COMMENTS_URI_NUMBER_TEMPLATE, owner, repo, number));
   }
 
@@ -115,7 +115,7 @@ public class IssueClient {
    * @param body comment content
    * @return the Comment that was just created
    */
-  public CompletableFuture<Comment> createComment(final int number, final String body) {
+  public CompletableFuture<Comment> createComment(final long number, final String body) {
     final String path = String.format(COMMENTS_URI_NUMBER_TEMPLATE, owner, repo, number);
     final String requestBody = github.json().toJsonUnchecked(ImmutableMap.of("body", body));
     return github.post(path, requestBody, Comment.class);

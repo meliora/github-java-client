@@ -48,7 +48,7 @@ public interface PullRequestEvent extends BaseEvent {
 
   /** The pull request number. */
   @Nullable
-  Integer number();
+  Long number();
 
   /** The pull request */
   @Nullable

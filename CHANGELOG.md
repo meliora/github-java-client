@@ -31,3 +31,4 @@ All notable changes to this fork will be documented in this file.
 
 - use pagination in PullRequestClient.list
 
+- use int64 instead of int32 in issue & pull request numbers

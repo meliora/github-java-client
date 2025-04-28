@@ -20,8 +20,11 @@
 
 package com.spotify.github.async;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.StreamSupport.stream;
@@ -51,4 +54,11 @@ public class Async {
                         })
                 .thenCompose(Function.identity());
     }
+
+    public static <T> List<T> getAllPages(final Iterator<AsyncPage<T>> pagesIterator) {
+        return streamFromPaginatingIterable(
+                () -> pagesIterator
+        ).collect(Collectors.toList());
+    }
+
 }

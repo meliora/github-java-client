@@ -73,7 +73,7 @@ public interface PullRequestItem extends CloseTracking {
 
   /** Number. */
   @Nullable
-  Integer number();
+  Long number();
 
   /** Either open, closed, or all to filter by state. Default: open. */
   @Nullable
