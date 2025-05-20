@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.spotify.github.GithubStyle;
 import com.spotify.github.v3.User;
 import com.spotify.github.v3.checks.Installation;
+import com.spotify.github.v3.issues.Issue;
 import com.spotify.github.v3.prs.PullRequest;
 import com.spotify.github.v3.repos.Organization;
 import com.spotify.github.v3.repos.Repository;
@@ -74,6 +75,10 @@ public interface WebhookRequestBody {
     @Nullable
     @JsonProperty("pull_request")
     PullRequest pullRequest();
+
+    @Nullable
+    @JsonProperty("issue")
+    Issue issue();
 
     @Nullable
     String zen();

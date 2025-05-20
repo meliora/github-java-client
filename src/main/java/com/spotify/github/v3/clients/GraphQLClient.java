@@ -61,10 +61,24 @@ public class GraphQLClient {
         return repo;
     }
 
+// Not supported in GitHub's API as of 20250520
+//
+//    /**
+//     * Executes a simple graphql query with HTTP GET method (and it's caveats).
+//     *
+//     * @param q query (will be encapsulated to a repository block), short enough to fit into query string
+//     * @return response
+//     */
+//    public CompletableFuture<GraphQLResponse> executeSimpleRepositoryQuery(final String q) {
+//        String query = parseRepositoryQuery(q, null, false);
+//        log.debug("executeSimpleRepositoryQuery: {}", query);
+//        return github.getGraphql(query, GraphQLResponse.class);
+//    }
+
     /**
      * Executes a simple graphql repository query.
      *
-     * @param q query encapsulated in repository-block
+     * @param q query (will be encapsulated to a repository block)
      * @return response
      */
     public CompletableFuture<GraphQLResponse> executeRepositoryQuery(final String q) {
@@ -74,12 +88,23 @@ public class GraphQLClient {
     /**
      * Executes a variabled graphql repository query.
      *
-     * @param q query encapsulated in repository-block
+     * @param q query (will be encapsulated to a repository block)
      * @param variables variables to include
      * @return response
      */
     public CompletableFuture<GraphQLResponse> executeRepositoryQuery(final String q, final Map<String, Object> variables) {
-        StringBuilder prefix = new StringBuilder("query");
+        String query = parseRepositoryQuery(q, variables);
+        final String requestBody = github.json().toJsonUnchecked(ImmutableGraphQLQuery.builder().query(query).variables(variables).build());
+        log.debug("executeRepositoryQuery: {}", requestBody);
+        return github.postGraphql(requestBody, GraphQLResponse.class);
+    }
+
+    protected String parseRepositoryQuery(final String q, final Map<String, Object> variables) {
+        return parseRepositoryQuery(q, variables, true);
+    }
+
+    protected String parseRepositoryQuery(final String q, final Map<String, Object> variables, final boolean wrapToQueryBlock) {
+        StringBuilder prefix = new StringBuilder(wrapToQueryBlock ? "query" : "");
         if (variables != null && !variables.isEmpty()) {
             prefix.append('(');
             for (Map.Entry<String, Object> v : variables.entrySet()) {
@@ -92,10 +117,11 @@ public class GraphQLClient {
             }
             prefix.append(')');
         }
-        String query = String.format(prefix + " { repository(owner: \"%s\", name: \"%s\") { %s } }", owner, repo, q);
-        final String requestBody = github.json().toJsonUnchecked(ImmutableGraphQLQuery.builder().query(query).variables(variables).build());
-        log.debug("executeRepositoryQuery: {}", requestBody);
-        return github.postGraphql(requestBody, GraphQLResponse.class);
+        if (prefix.length() > 0) {
+            return String.format(prefix + " { repository(owner: \"%s\", name: \"%s\") { %s } }", owner, repo, q);
+        } else {
+            return String.format("{ repository(owner: \"%s\", name: \"%s\") { %s } }", owner, repo, q);
+        }
     }
 
     /**

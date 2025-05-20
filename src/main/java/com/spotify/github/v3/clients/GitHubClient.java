@@ -715,6 +715,18 @@ public class GitHubClient {
   }
 
   /**
+   * Make a GET request to the graphql endpoint of Github
+   *
+   * @param query query, to be sent in query parameter
+   * @return response
+   */
+  public CompletableFuture<Response> getGraphql(final String query) {
+    final Request request = graphqlRequestBuilder(query).build();
+    log.info("Making GET request to {}", request.url());
+    return call(request);
+  }
+
+  /**
    * Make a POST request to the graphql endpoint of Github
    *
    * @param data request body as stringified JSON
@@ -725,6 +737,19 @@ public class GitHubClient {
    */
   <T> CompletableFuture<T> postGraphql(final String data, final Class<T> clazz) {
     return postGraphql(data)
+            .thenApply(
+                    response -> json().fromJsonUncheckedNotNull(responseBodyUnchecked(response), clazz));
+  }
+
+  /**
+   * Make a GET request to the graphql endpoint of Github
+   *
+   * @param query query, to be embedded to query parameter
+   * @param clazz class to cast response as
+   * @return response
+   */
+  <T> CompletableFuture<T> getGraphql(final String query, final Class<T> clazz) {
+    return getGraphql(query)
             .thenApply(
                     response -> json().fromJsonUncheckedNotNull(responseBodyUnchecked(response), clazz));
   }
@@ -868,7 +893,18 @@ public class GitHubClient {
   }
 
   private Request.Builder graphqlRequestBuilder() {
+    return graphqlRequestBuilder(null);
+  }
+
+  private Request.Builder graphqlRequestBuilder(final String query) {
     URI url = graphqlUrl.orElseThrow(() -> new IllegalStateException("No graphql url set"));
+
+    if (query != null) {
+      HttpUrl.Builder urlBuilder = HttpUrl.parse(url.toString()).newBuilder();
+      urlBuilder.addQueryParameter("query", query);
+      url = urlBuilder.build().uri();
+    }
+
     final Request.Builder builder =
             new Request.Builder()
                     .url(url.toString())
