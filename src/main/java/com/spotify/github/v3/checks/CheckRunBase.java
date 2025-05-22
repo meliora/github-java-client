@@ -20,6 +20,7 @@
 
 package com.spotify.github.v3.checks;
 
+import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -35,6 +36,7 @@ public interface CheckRunBase {
    *
    * @return the string
    */
+  @Nullable
   String headSha();
 
   /**
@@ -42,6 +44,7 @@ public interface CheckRunBase {
    *
    * @return the string
    */
+  @Nullable
   String name();
 
   /**
@@ -49,6 +52,7 @@ public interface CheckRunBase {
    *
    * @return the check run status enum
    */
+  @Nullable
   CheckRunStatus status();
 
   /**
