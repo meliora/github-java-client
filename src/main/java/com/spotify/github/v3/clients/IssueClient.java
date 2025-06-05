@@ -20,6 +20,7 @@
 
 package com.spotify.github.v3.clients;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.spotify.github.async.AsyncPage;
 import com.spotify.github.v3.AttachmentFile;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import com.spotify.github.v3.issues.Issue;
+import com.spotify.github.v3.issues.requests.IssueParameters;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,8 @@ public class IssueClient {
   static final String COMMENTS_URI_ID_TEMPLATE = "/repos/%s/%s/issues/comments/%s";
 
   static final String ISSUES_URI_NUMBER_TEMPLATE = "/repos/%s/%s/issues/%s";
+
+  static final String ISSUES_URI_LIST_TEMPLATE = "/repos/%s/%s/issues";
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -75,6 +79,30 @@ public class IssueClient {
 
   public String getRepo() {
     return repo;
+  }
+
+  /**
+   * List repository issues.
+   *
+   * @return issues
+   */
+  public Iterator<AsyncPage<Issue>> listIssues() {
+    return listIssues(null);
+  }
+
+  /**
+   * List repository issues.
+   *
+   * @param parameters request parameters
+   * @return issues
+   */
+  public Iterator<AsyncPage<Issue>> listIssues(final IssueParameters parameters) {
+    final String serial = parameters != null ? parameters.serialize() : null;
+    final String path = String.format(ISSUES_URI_LIST_TEMPLATE, owner, repo) + (Strings.isNullOrEmpty(serial) ? "" : "?" + serial);
+    log.info("Fetching issues from " + path);
+    return new GithubPageIterator<>(new GithubPage<>(
+            github, path, LIST_ISSUE_TYPE_REFERENCE, Collections.singletonMap(HttpHeaders.ACCEPT, "application/vnd.github.full+json"))
+    );
   }
 
   /**

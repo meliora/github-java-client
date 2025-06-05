@@ -20,12 +20,15 @@
 
 package com.spotify.github.v3.clients;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.spotify.github.v3.checks.CheckRunRequest;
 import com.spotify.github.v3.checks.CheckRunResponse;
 import com.spotify.github.v3.checks.CheckRunResponseList;
 import com.spotify.github.v3.checks.CheckSuite;
 import com.spotify.github.v3.checks.CheckSuiteResponseList;
+import com.spotify.github.v3.checks.requests.CheckRunParameters;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.HttpHeaders;
@@ -109,6 +112,18 @@ public class ChecksClient {
    */
   public CompletableFuture<CheckRunResponseList> getCheckRuns(final String ref) {
     final String path = String.format(LIST_CHECK_RUNS_URI, owner, repo, ref);
+    return github.request(path, CheckRunResponseList.class, extraHeaders);
+  }
+
+  /**
+   * List checkRuns for a given ref using given parameters.
+   *
+   * @param ref the ref
+   * @return a list of CheckRun
+   */
+  public CompletableFuture<CheckRunResponseList> getCheckRuns(final String ref, final CheckRunParameters parameters) {
+    final String serial = parameters.serialize();
+    final String path = String.format(LIST_CHECK_RUNS_URI, owner, repo, ref) + (Strings.isNullOrEmpty(serial) ? "" : "?" + serial);
     return github.request(path, CheckRunResponseList.class, extraHeaders);
   }
 
