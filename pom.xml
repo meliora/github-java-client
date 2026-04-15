@@ -102,6 +102,7 @@
         <objenesis.version>3.3</objenesis.version>
         <opencensus.version>0.31.1</opencensus.version>
         <okhttp.version>4.11.0</okhttp.version>
+        <grpc.version>1.80.0</grpc.version>
 
 <!--        <shade.id>${project.groupId}.githubclient.shade</shade.id>-->
     </properties>
@@ -119,6 +120,11 @@
                 <version>${jackson.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-context</artifactId>
+                <version>${grpc.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

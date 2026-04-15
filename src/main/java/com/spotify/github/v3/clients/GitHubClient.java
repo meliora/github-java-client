@@ -152,7 +152,11 @@ public class GitHubClient {
     this.baseUrl = baseUrl;
     this.graphqlUrl = Optional.ofNullable(graphqlUrl);
     this.token = accessToken;
-    this.client = client;
+
+    // prefer to use our own processing for redirects instead of okhttp clients logic - null check because of mocks
+    final OkHttpClient.Builder builder = client.newBuilder();
+    this.client = builder != null ? builder.followRedirects(false).build() : client;
+
     this.privateKey = privateKey;
     this.appId = appId;
     this.installationId = installationId;
@@ -534,7 +538,7 @@ public class GitHubClient {
     if (path.startsWith("http://") || path.startsWith("https://")) {
       // request to raw content resource, most-likely a github attachment file or such
       //
-      // caller is reponsible for adding needed headers such as ACCEPT et al 
+      // caller is responsible for adding needed headers such as ACCEPT et al
       builder = new Request.Builder().url(path);
       builder.addHeader(HttpHeaders.AUTHORIZATION, getAuthorizationHeader(path));
     } else {
@@ -542,11 +546,12 @@ public class GitHubClient {
       builder = requestBuilder(path);
     }
 
+    // if caller passes authorization header, do not use the default one
     if (extraHeaders.containsKey(HttpHeaders.AUTHORIZATION)) {
       builder.removeHeader(HttpHeaders.AUTHORIZATION);
     }
-
     extraHeaders.forEach(builder::addHeader);
+
     final Request request = builder.build();
     log.debug("Making request to {}", request.url());
     return call(request);
@@ -1114,13 +1119,31 @@ public class GitHubClient {
         && response.code() <= TEMPORARY_REDIRECT
         && !redirected.get()) {
       redirected.set(true);
-      // redo the same request with a new URL
+
+      boolean isRequestForAttachment =
+          "application/octet-stream".equals(response.request().header("Accept"));
+
       final String newLocation = response.header("Location");
-      final Request request =
-          requestBuilder(newLocation)
-              .url(newLocation)
-              .method(response.request().method(), response.request().body())
-              .build();
+
+      Request.Builder builder;
+      if (isRequestForAttachment) {
+        // request for file attachment - redo the same request, preserve original headers (but drop Authorization) and pass cookies on
+        builder = response.request().newBuilder().url(newLocation);
+        builder.removeHeader("Authorization");
+        final List<String> setCookies = response.headers("Set-Cookie");
+        if (!setCookies.isEmpty()) {
+          final String cookieHeader = setCookies.stream()
+                          .map(c -> c.split(";", 2)[0])
+                          .collect(java.util.stream.Collectors.joining("; "));
+          builder.header("Cookie", cookieHeader);
+        }
+      } else {
+        // normal api call: redo the same request with a new URL
+        builder = requestBuilder(newLocation)
+                        .url(newLocation)
+                        .method(response.request().method(), response.request().body());
+      }
+      final Request request = builder.build();
       // Do the new call and complete the original future when the new call completes
       return call(request);
     }
