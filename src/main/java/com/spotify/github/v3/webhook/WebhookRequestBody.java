@@ -32,6 +32,7 @@ import com.spotify.github.v3.repos.Repository;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Request body for incoming webhook call to a configured hook.
@@ -79,6 +80,30 @@ public interface WebhookRequestBody {
     @Nullable
     @JsonProperty("issue")
     Issue issue();
+
+    /**
+     * For the {@code installation_repositories} event: whether the installation can access
+     * all repositories or only selected ones. Typically {@code "all"} or {@code "selected"}.
+     */
+    @Nullable
+    @JsonProperty("repository_selection")
+    String repositorySelection();
+
+    /**
+     * For the {@code installation_repositories} event with action {@code "added"}: the list
+     * of repositories the installation can now access.
+     */
+    @Nullable
+    @JsonProperty("repositories_added")
+    List<Repository> repositoriesAdded();
+
+    /**
+     * For the {@code installation_repositories} event with action {@code "removed"}: the list
+     * of repositories the installation can no longer access.
+     */
+    @Nullable
+    @JsonProperty("repositories_removed")
+    List<Repository> repositoriesRemoved();
 
     @Nullable
     String zen();

@@ -23,6 +23,7 @@ package com.spotify.github.v3.clients;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.spotify.github.async.AsyncPage;
 import com.spotify.github.v3.User;
+import com.spotify.github.v3.apps.InstallationRepositoriesResponse;
 import com.spotify.github.v3.checks.Installation;
 import com.spotify.github.v3.user.requests.SuspensionReason;
 import org.slf4j.Logger;
@@ -42,6 +43,8 @@ public class UserClient {
   private static final String SUSPEND_USER_TEMPLATE = "/users/%s/suspended";
   private static final String USERS_URI_USERNAME_TEMPLATE = "/users/%s";
   private static final String GET_INSTALLATIONS_WITH_USER_ACCESS_TOKEN = "/user/installations";
+  private static final String GET_INSTALLATION_REPOS_WITH_USER_ACCESS_TOKEN =
+      "/user/installations/%d/repositories";
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -112,6 +115,23 @@ public class UserClient {
     return new GithubPageIterator<>(
             new WrappedGithubPage<>(github, GET_INSTALLATIONS_WITH_USER_ACCESS_TOKEN, INSTALLATION_LIST_TYPE_REFERENCE, "installations")
     );
+  }
+
+  /**
+   * List repositories an app installation can access, using only the user access token.
+   *
+   * The client this is called with must be set up with a user access token. Unlike
+   * {@link GithubAppClient#listAccessibleRepositories(int)} this does not require the
+   * App's private key, so it can be used during the OAuth install callback before any
+   * App-JWT-capable client exists.
+   *
+   * @param installationId installation id
+   * @return the accessible repositories for the user on the installation
+   */
+  public CompletableFuture<InstallationRepositoriesResponse> listUserInstallationRepositories(
+      final long installationId) {
+    final String path = String.format(GET_INSTALLATION_REPOS_WITH_USER_ACCESS_TOKEN, installationId);
+    return github.request(path, InstallationRepositoriesResponse.class);
   }
 
 }
